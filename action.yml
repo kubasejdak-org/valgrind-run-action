@@ -2,33 +2,47 @@ name: Run valgrind on binary
 description: Run valgrind on binary
 
 inputs:
+  artifact:
+    description: Artifact to download
+    required: false
+
   binary:
     description: Binary to run
     required: true
-  artifact:
-    description: Artifact to download
-    required: true
-  cmdArgs:
+
+  run-args:
     description: Cmomand line arguments passed to the binary
     required: false
-  runEnv:
+
+  run-env:
     description: Environment variables to set for the binary
+    required: false
+
+  workdir:
+    description: Working directory to run the binary in
     required: false
 
 runs:
   using: composite
   steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v6
+      if: ${{ inputs.artifact != '' }}
       with:
-        name: build-${{ inputs.artifact }}
-    - name: run valgrind
+        name: ${{ inputs.artifact }}
+
+    - name: Run valgrind
       shell: bash
       run: |
-        chmod +x ${{ inputs.binary }}
-        ${{ inputs.runEnv }} valgrind --leak-check=full \
-                   --show-leak-kinds=definite,indirect,possible \
-                   --fair-sched=yes \
-                   --track-origins=yes \
-                   --trace-children=yes \
-                   --error-markers=errstart,errend \
-                   ./${{ inputs.binary }} ${{ inputs.cmdArgs }}
+        if [ -n "${{ inputs.workdir }}" ]; then
+          cd ${{ inputs.workdir }}
+        fi
+
+        chmod +x ./${{ inputs.binary }}
+
+        ${{ inputs.run-env }} valgrind --leak-check=full \
+          --show-leak-kinds=definite,indirect,possible \
+          --fair-sched=yes \
+          --track-origins=yes \
+          --trace-children=yes \
+          --error-markers=errstart,errend \
+          ./${{ inputs.binary }} ${{ inputs.run-args }}
