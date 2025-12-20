@@ -11,7 +11,7 @@ inputs:
     required: true
 
   run-args:
-    description: Cmomand line arguments passed to the binary
+    description: Command line arguments passed to the binary
     required: false
 
   run-env:
