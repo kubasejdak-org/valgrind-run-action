@@ -25,7 +25,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/download-artifact@v6
+    - uses: actions/download-artifact@v8
       if: ${{ inputs.artifact != '' }}
       with:
         name: ${{ inputs.artifact }}
